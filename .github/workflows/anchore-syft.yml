@@ -24,7 +24,7 @@ jobs:
   Depscan:
     runs-on: ubuntu-latest
     steps:
-    - uses: AppThreat/dep-scan-action@master
+      - uses: AppThreat/dep-scan-action@master
         with:
           # The target directory to be scanned. Optional.
           src: /github/workspace
