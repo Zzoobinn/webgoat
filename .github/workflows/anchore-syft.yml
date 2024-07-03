@@ -24,6 +24,8 @@ jobs:
   Depscan:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
       - uses: zoobinn/dep-scan-action@patch-1
         with:
           # The target directory to be scanned. Optional.
