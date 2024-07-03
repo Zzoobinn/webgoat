@@ -17,6 +17,6 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "[rubby] "
+      prefix: "[ruby] "
     open-pull-requests-limit: 10
 
