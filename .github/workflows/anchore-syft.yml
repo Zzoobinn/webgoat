@@ -21,23 +21,6 @@ permissions:
   contents: write
 
 jobs:
-  Depscan:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the code
-        uses: actions/checkout@v4
-      - uses: zoobinn/dep-scan-action@patch-1
-        with:
-          # The target directory to be scanned. Optional.
-          src: /github/workspace
-          # Output file for the generated report. Optional.
-          report_file: /github/workspace/reports/depscan.json
-          # Must equal "I have sponsored OWASP-dep-scan" for action to run. Required.
-          profile: generic
-          thank_you: "I have not sponsored OWASP-dep-scan."
-        env:
-          VDB_HOME: ${{ github.workspace }}/db
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   Anchore-Build-Scan:
     permissions:
       contents: write # required to upload to the Dependency submission API
@@ -47,17 +30,19 @@ jobs:
       uses: actions/checkout@v4
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag localbuild/testimage:latest
-    - name: Scan for vulnerabilities
-      uses: anchore/scan-action@v3
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
       with:
-        image: localbuild/testimage:latest
-        fail-build: false
-        severity-cutoff: high
-        output-format: table
-    - name: Scan the image and upload dependency results
-      uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
+          image-ref: 'my-image:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
       with:
-        image: "localbuild/testimage:latest"
-        artifact-name: image.spdx.json
-        dependency-snapshot: true
+        sarif_file: 'trivy-results.sarif'
    
